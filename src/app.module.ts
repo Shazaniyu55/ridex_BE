@@ -32,6 +32,10 @@ import { Rating } from './rides/entities/rating.entity';
         entities: [User, Driver, Ride, Payment, Rating],
         synchronize: config.get('NODE_ENV') !== 'production', // auto-migrate in dev
         logging: config.get('NODE_ENV') === 'development',
+        ssl: config.get('NODE_ENV') === 'production'  //  only SSL in prod
+      ? { rejectUnauthorized: false }
+      : false,
+  
       }),
       inject: [ConfigService],
     }),
