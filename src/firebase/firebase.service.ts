@@ -10,26 +10,53 @@ export class FirebaseService implements OnModuleInit {
   constructor(private config: ConfigService) {}
 
   onModuleInit() {
-    const serviceAccountPath = this.config.get<string>(
-      'FIREBASE_SERVICE_ACCOUNT_PATH',
-      './firebase-service-account.json',
-    );
-    const databaseURL = this.config.get<string>('FIREBASE_DATABASE_URL');
+  const databaseURL = this.config.get<string>('FIREBASE_DATABASE_URL');
 
-    try {
-      if (!admin.apps.length) {
-        this.app = admin.initializeApp({
-          credential: admin.credential.cert(serviceAccountPath),
-          databaseURL,
-        });
-        this.logger.log('Firebase Admin SDK initialized');
-      } else {
-        this.app = admin.app();
+  try {
+    if (!admin.apps.length) {
+      //  Read from env variable, not a file path
+      const serviceAccountJson = this.config.get<string>('FIREBASE_SERVICE_ACCOUNT');
+
+      if (!serviceAccountJson) {
+        this.logger.error('FIREBASE_SERVICE_ACCOUNT env variable is not set');
+        return;
       }
-    } catch (error) {
-      this.logger.error('Firebase init failed', error.message);
+
+      const serviceAccount = JSON.parse(serviceAccountJson);
+
+      this.app = admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount), //  pass object not path
+        databaseURL,
+      });
+      this.logger.log('Firebase Admin SDK initialized');
+    } else {
+      this.app = admin.app();
     }
+  } catch (error) {
+    this.logger.error('Firebase init failed', error.message);
   }
+}
+  // onModuleInit() {
+  //   const serviceAccountPath = this.config.get<string>(
+  //     'FIREBASE_SERVICE_ACCOUNT_PATH',
+  //     './firebase-service-account.json',
+  //   );
+  //   const databaseURL = this.config.get<string>('FIREBASE_DATABASE_URL');
+
+  //   try {
+  //     if (!admin.apps.length) {
+  //       this.app = admin.initializeApp({
+  //         credential: admin.credential.cert(serviceAccountPath),
+  //         databaseURL,
+  //       });
+  //       this.logger.log('Firebase Admin SDK initialized');
+  //     } else {
+  //       this.app = admin.app();
+  //     }
+  //   } catch (error) {
+  //     this.logger.error('Firebase init failed', error.message);
+  //   }
+  // }
 
   // ── Push Notifications ────────────────────────────────────────────────
 
