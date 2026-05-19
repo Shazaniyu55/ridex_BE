@@ -36,7 +36,7 @@ import { Rating } from './rides/entities/rating.entity';
         password: config.get('DB_PASSWORD', 'postgres'),
         database: config.get('DB_NAME', 'uber_db'),
         entities: [User, Driver, Ride, Payment, Rating],
-        synchronize: config.get('NODE_ENV') !== 'production', // auto-migrate in dev
+        synchronize: !isProduction || forceSynchronize, // auto-migrate in dev
         logging: config.get('NODE_ENV') === 'development',
         ssl: config.get('NODE_ENV') === 'production'  //  only SSL in prod
       ? { rejectUnauthorized: false }
