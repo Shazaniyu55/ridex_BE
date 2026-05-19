@@ -22,7 +22,13 @@ import { Rating } from './rides/entities/rating.entity';
     // TypeORM + PostgreSQL
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
+      useFactory: (config: ConfigService) => {
+                const isProduction = config.get('NODE_ENV') === 'production';
+        // DB_SYNCHRONIZE env var lets you force a one-time sync in production
+        // Set it to "true" on first deploy, then remove it
+        const forceSynchronize = config.get('DB_SYNCHRONIZE') === 'true';
+
+       return{ 
         type: 'postgres',
         host: config.get('DB_HOST', 'localhost'),
         port: config.get<number>('DB_PORT', 5432),
@@ -34,9 +40,9 @@ import { Rating } from './rides/entities/rating.entity';
         logging: config.get('NODE_ENV') === 'development',
         ssl: config.get('NODE_ENV') === 'production'  //  only SSL in prod
       ? { rejectUnauthorized: false }
-      : false,
+      : false,}
   
-      }),
+      },
       inject: [ConfigService],
     }),
 
